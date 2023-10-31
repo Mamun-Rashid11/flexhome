@@ -12,7 +12,7 @@
             ->usePath()
             ->add('leaflet.markercluster-src-js', 'libraries/leaflet/leaflet.markercluster-src.js');
     }
-    
+
     $categories = get_property_categories([
         'indent' => '↳',
         'conditions' => ['status' => \Botble\Base\Enums\BaseStatusEnum::PUBLISHED],
@@ -81,9 +81,53 @@
                     @endif
                 </div>
             </form>
+            <div>
+                <div id="description"></div>
+            </div>
         </div>
     </div>
 </section>
+<script>
+    $(document).ready(function () {
+        updateDescription()
+
+        // $('#select-type').change(function () {
+        //     updateDescription()
+        // })
+        // $('#select-bedroom').change(function () {
+        //     updateDescription()
+        // })
+        $('#location').change(function () {
+            updateDescription()
+        })
+    })
+
+    function updateDescription(){
+    let prop_location = $('#location')[0].value
+    let select_bedroom = $('#select-bedroom')[0].value
+    let type = $('#select-type')[0].value
+        $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+        });
+        $.ajax({
+            url: '/get-description',
+            method: 'POST',
+            data: {
+                location: prop_location,
+            },
+            success: function (res) {
+                $('#description').html(res)
+                if(res.length == 0){
+                    $('#description-heading').addClass('d-none')
+                }else{
+                    $('#description-heading').removeClass('d-none')
+                }
+            }
+        })
+    }
+</script>
 
 @if (theme_option('show_map_on_properties_page', 'yes') == 'yes')
     <script id="traffic-popup-map-template" type="text/x-custom-template">

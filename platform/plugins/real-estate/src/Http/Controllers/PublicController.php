@@ -8,6 +8,7 @@ use Botble\Base\Facades\EmailHandler;
 use Botble\Base\Http\Responses\BaseHttpResponse;
 use Botble\Base\Supports\Helper;
 use Botble\Base\Supports\RepositoryHelper;
+use Botble\Location\Models\City;
 use Botble\Location\Models\State;
 use Botble\Location\Repositories\Interfaces\CityInterface;
 use Botble\Media\Facades\RvMedia;
@@ -237,7 +238,6 @@ class PublicController extends Controller
         SeoHelper::setTitle(__('Properties'));
 
         $properties = RealEstateHelper::getPropertiesFilter((int)theme_option('number_of_properties_per_page') ?: 12, RealEstateHelper::getReviewExtraData());
-
         if ($request->ajax()) {
             if ($request->query('minimal')) {
                 return $response->setData(Theme::partial('search-suggestion', ['items' => $properties]));
@@ -464,6 +464,7 @@ class PublicController extends Controller
         CityInterface $cityRepository,
         BaseHttpResponse $response
     ) {
+        // dd('here ',$slug);
         $city = $cityRepository->getFirstBy(compact('slug'));
 
         if (! $city) {
@@ -483,7 +484,6 @@ class PublicController extends Controller
         $request->merge(['city' => $slug]);
 
         $properties = RealEstateHelper::getPropertiesFilter($perPage, RealEstateHelper::getReviewExtraData());
-
         if ($request->ajax()) {
             if ($request->input('minimal')) {
                 return $response->setData(Theme::partial('search-suggestion', ['items' => $properties]));
@@ -491,7 +491,6 @@ class PublicController extends Controller
 
             return $response->setData(Theme::partial('real-estate.properties.items', ['properties' => $properties]));
         }
-
         return Theme::scope('real-estate.properties', [
             'properties' => $properties,
             'ajaxUrl' => route('public.properties-by-city', $city->slug),
@@ -646,5 +645,17 @@ class PublicController extends Controller
 
         return Theme::scope('real-estate.agent', compact('properties', 'account'))
             ->render();
+    }
+    public function getDescription (Request $request)
+    {
+        $name = explode(',',$request->location);
+        $description = '';
+        if(isset($name[0])){
+          $city =   City::where('name','like','%'.$name[0].'%')->first();
+            if($city){
+                $description = $city->description;
+            }
+        }
+        return $description;
     }
 }

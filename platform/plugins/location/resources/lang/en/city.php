@@ -9,4 +9,5 @@ return [
     'country' => 'Country',
     'select_country' => 'Select country...',
     'city' => 'City',
+    'description' => 'Description',
 ];

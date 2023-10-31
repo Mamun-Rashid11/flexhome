@@ -112,7 +112,7 @@
                 @endif
                 <div class="col-lg-2 col-xl-1 col-md-2 px-1 button-search-wrapper" style="align-self: flex-end;">
                     <div class="btn-group text-center w-100 ">
-                        <button type="submit" class="btn btn-primary btn-full">{{ __('Search') }}</button>
+                        <button type="submit" onclick="updateDescription()" class="btn btn-primary btn-full">{{ __('Search') }}</button>
                         <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <span class="sr-only">Toggle Dropdown</span>
                         </button>

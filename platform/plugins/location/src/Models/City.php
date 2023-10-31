@@ -24,6 +24,7 @@ class City extends BaseModel
         'order',
         'is_default',
         'status',
+        'description',
     ];
 
     protected $casts = [

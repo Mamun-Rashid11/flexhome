@@ -240,6 +240,8 @@ Route::group(['namespace' => 'Botble\RealEstate\Http\Controllers', 'middleware' 
             Route::match(theme_option('properties_list_page_id') ? ['POST'] : ['POST', 'GET'], SlugHelper::getPrefix(Property::class, 'properties'), 'PublicController@getProperties')
                 ->name('public.properties');
 
+            Route::post('get-description', 'PublicController@getDescription')->name('get-description');
+
             Route::get(SlugHelper::getPrefix(Project::class, 'projects') . '/{slug}', 'PublicController@getProject');
 
             Route::get(SlugHelper::getPrefix(Property::class, 'properties') . '/{slug}', 'PublicController@getProperty');

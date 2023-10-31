@@ -8,6 +8,8 @@ use Botble\Location\Models\State;
 use Botble\RealEstate\Enums\PropertyTypeEnum;
 use Botble\RealEstate\Facades\RealEstateHelper;
 use Botble\RealEstate\Models\Account;
+use Botble\RealEstate\Models\Category;
+use Botble\RealEstate\Models\Property;
 use Botble\RealEstate\Repositories\Interfaces\ProjectInterface;
 use Botble\RealEstate\Repositories\Interfaces\PropertyInterface;
 use Botble\Shortcode\Compilers\Shortcode;
@@ -127,7 +129,6 @@ app()->booted(function () {
             function ($shortcode) {
                 $cityIds = array_filter(explode(',', (string)$shortcode->city));
                 $stateIds = array_filter(explode(',', (string)$shortcode->state));
-
                 if (empty($cityIds) && empty($stateIds)) {
                     return null;
                 }
@@ -195,6 +196,116 @@ app()->booted(function () {
                 Html::script('vendor/core/core/base/js/tags.js') .
                 Theme::partial('short-codes.properties-by-locations-admin-config', compact('attributes', 'cities', 'states'));
         });
+
+        // custom short code
+
+        add_shortcode(
+            'properties-by-custom',
+            __('Properties by Custom'),
+            __('Properties by Custom'),
+            function ($shortcode) {
+                $cityIds = array_filter(explode(',', (string)$shortcode->city));
+                $stateIds = array_filter(explode(',', (string)$shortcode->state));
+                $typesIds = array_filter(explode(',', (string)$shortcode->type));
+                $bedroom_number = array_filter(explode(',', (string)$shortcode->bedrooms));
+                $categories = array_filter(explode(',', (string)$shortcode->categories));
+
+                if (empty($cityIds) && empty($stateIds) && empty($typesIds) && empty($bedroom_number) && empty($categories)) {
+                    return null;
+                }
+                $cities = collect();
+                $states = collect();
+
+                if (! empty($cityIds)) {
+                    $cities = City::query()
+                        ->whereIn('id', $cityIds)
+                        ->wherePublished()
+                        ->select(['id', 'name', 'image', 'slug'])
+                        ->orderBy('order')
+                        ->orderBy('name')
+                        ->get();
+
+                    $cities->transform(function (City $city) {
+                        $city->setAttribute('url', route('public.properties-by-city', $city->slug));
+
+                        return $city;
+                    });
+                }
+
+                if (! empty($stateIds)) {
+                    $states = State::query()
+                        ->whereIn('id', $stateIds)
+                        ->wherePublished()
+                        ->select(['id', 'name', 'image', 'slug'])
+                        ->orderBy('order')
+                        ->orderBy('name')
+                        ->get();
+
+                    $states->transform(function (State $state) {
+                        $state->setAttribute('url', route('public.properties-by-state', $state->slug));
+
+                        return $state;
+                    });
+                }
+
+
+
+                // $locations = $cities->merge($states);
+                // $perPage = (int)theme_option('number_of_properties_per_page', 12);
+
+                $properties = Property::when($cityIds, function ($query, $cityIds) {
+                    $query->whereIn('city_id', $cityIds);
+                })
+                ->when($bedroom_number, function ($query, $bedroom_number) {
+                    $query->where('number_bedroom', $bedroom_number);
+                })
+                ->when($stateIds, function ($query, $stateIds) {
+                    $query->whereIn('state_id', $stateIds);
+                })
+                ->when($typesIds, function ($query, $typesIds) {
+                    $query->whereIn('type', $typesIds);
+                })
+                ->when($categories, function ($query, $categories) {
+                    $query->whereRelation('categories','category_id', $categories);
+                })
+                ->get();
+
+
+
+                // whereIn('type', $typesIds)
+                    // ->orderByDesc('id')
+                    // ->get();
+
+                return Theme::partial('short-codes.properties-by-custom', [
+                    'title' => $shortcode->title,
+                    'subtitle' => $shortcode->subtitle,
+                    'properties' => $properties,
+                ]);
+            }
+        );
+
+        shortcode()->setAdminConfig('properties-by-custom', function (array $attributes) {
+            $cities = City::query()
+                ->wherePublished()
+                ->pluck('name', 'id');
+
+            $states = State::query()
+                ->wherePublished()
+                ->pluck('name', 'id');
+
+            $types = ['sale' => __('Sale'), 'rent' => __('Rent')];
+            $bedrooms = ['' => 'All','1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5','6' => '6','7' => '7','8' => '8','9' => '9','10' => '10'];
+            $categories = Category::query()
+                ->wherePublished()
+                ->pluck('name', 'id');
+            $categories = ['' => 'All'] + $categories->toArray();
+            return Html::style('vendor/core/core/base/libraries/tagify/tagify.css') .
+                Html::script('vendor/core/core/base/libraries/tagify/tagify.js') .
+                Html::script('vendor/core/core/base/js/tags.js') .
+                Theme::partial('short-codes.properties-by-custom-admin-config', compact('attributes', 'cities', 'states','types','bedrooms','categories'));
+        });
+
+        // end custom short
 
         add_shortcode('featured-properties', __('Featured properties'), __('Featured properties'), function (Shortcode $shortcode) {
             $properties = app(PropertyInterface::class)->getPropertiesByConditions(

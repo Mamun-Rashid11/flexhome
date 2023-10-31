@@ -14,6 +14,7 @@ class CityRequest extends Request
             'name' => 'required|string|max:220',
             'state_id' => 'required|integer',
             'country_id' => 'required|integer',
+            'description' => 'nullable',
             'slug' => [
                 'nullable',
                 'string',

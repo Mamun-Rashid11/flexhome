@@ -77,11 +77,18 @@ class CityForm extends FormAbstract
                 'label' => trans('core/base::forms.is_default'),
                 'default_value' => false,
             ])
+            ->add('description', 'editor', [
+                'label' => trans('core/base::forms.description'),
+                'attr' => [
+                    'placeholder' => trans('core/base::forms.description'),
+                ],
+            ])
             ->add('status', 'customSelect', [
                 'label' => trans('core/base::tables.status'),
                 'required' => true,
                 'choices' => BaseStatusEnum::labels(),
             ])
+
             ->add('image', 'mediaImage')
             ->setBreakFieldPoint('status');
     }
