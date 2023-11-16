@@ -11,11 +11,12 @@
         <div class="projecthome mb-2">
             <div class="row rowm10">
                 @foreach ($properties as $property)
-                    <div class="col-sm-6 col-lg-4 col-xl-3 colm10">
+                    <div class="col-sm-6 col-lg-4 col-xl-4 colm10">
                         {!! Theme::partial('real-estate.properties.item', ['property' => $property]) !!}
                     </div>
                 @endforeach
             </div>
+            {!! $properties->links() !!}
         </div>
     </div>
 </div>
