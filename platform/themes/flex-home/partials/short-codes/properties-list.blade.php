@@ -104,6 +104,13 @@
 
     function updateDescription(){
     let prop_location = $('#location')[0].value
+    if(prop_location == ''){
+        console.log('here');
+        const currentURL = window.location.href;
+        const urlParts = currentURL.split('/');
+        const city = urlParts[urlParts.length - 1];
+        prop_location = city
+    }
     let select_bedroom = $('#select-bedroom')[0].value
     let type = $('#select-type')[0].value
         $.ajaxSetup({

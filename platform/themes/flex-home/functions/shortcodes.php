@@ -268,7 +268,7 @@ app()->booted(function () {
                 ->when($categories, function ($query, $categories) {
                     $query->whereRelation('categories','category_id', $categories);
                 })
-                ->paginate(6);
+                ->orderBy('created_at', 'desc')->paginate(6);
 
 
 
